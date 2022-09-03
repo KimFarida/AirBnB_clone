@@ -1,53 +1,94 @@
-#!/usr/bin/python3
-"""Entry level of command line console"""
+'''console.py
+'''
 
 import cmd
-import json
+from models.base_model import BaseModel
 from models import storage
 
-class AirBnBCommand(cmd.Cmd):
-    """Command line Processor"""
 
-    prompt = "(hbnb)"
-    l_classes = ['BaseModel']
+class HBNBCommand(cmd.Cmd):
+    prompt = "(hbnb) "
 
-    l_c = ['create', 'show', 'update', 'all', 'destroy', 'count']
+    model_list = ["BaseModel"]
 
-    def precmd(self, arg):
-        """accepts command input"""
-        if '.' in arg and '(' in arg and ')' in arg:
-            cls = arg.split('.')
-            cnd = cls[1].split('(')
-            args = cnd[1].split(')')
-            if cls[0] in AirBnBCommand.l_classes and cnd[0] in AirBnBCommand.l_c:
-                arg = cnd[0] + ' '+ cls[0] + ' '+ args[0]
 
-        return arg
 
-    def help_help(self):
-        """Prints command line help"""
-        print("Provides description of a command")
+    def do_quit(self, args):
+        '''
+        This command quits the interpreter
+        '''
+        return True
 
+    def do_EOF(self, args):
+        '''
+        This command quits the interpreter
+        '''
+
+        return True
+    
     def emptyline(self):
-        """do nothing when it is empty line"""
-        pass
+        return False
 
-    def do_count(self, cls_name):
-        """counts the number of instances in a class"""
-        count = 0
-        all_objs = storage.all()
-        for k, v in all_objs.items():
-            clss = k.split('.')
-            if clss[0] == cls_name:
-                count += 1
-        print(count)
-
-    def do_create(self, type_model):
-        """creates an instance based on the class"""
-
-        if not type_model:
-            print("** class name is missing **")
-        elif type_model not in AirBnBCommand.l_classes:
-            print("** class does not exist **")
+    def onecmd(self, args):
+        if args == "quit":
+            return self.do_quit(args)
+        elif args == "EOF":
+            return self.do_EOF(args)
         else:
-            dct = 
+            cmd.Cmd.onecmd(self, args)
+
+    @classmethod
+    def handle_errors(cls,args, **kwargs):
+        if not args:
+            print("** class name missing **")
+            return True
+        else:
+            args = args.split(" ")
+
+        n = len(args)
+        if args[0] not in HBNBCommand.model_list:
+            print("** class doesn't exist **")
+            return True
+
+        if 'command' not in kwargs:
+            return False
+
+        
+        for arg in kwargs.values():
+            if n < 2:
+                print("** instance id missing **")
+                return True
+
+        return False
+
+    def do_create(self, args):
+
+        error = HBNBCommand.handle_errors(args)
+        
+        if error:
+            return
+
+        obj = eval(args)()
+        obj.save()
+        print(obj.id)
+
+    def do_show(self, args):
+        error = HBNBCommand.handle_errors(args, command = "show")
+
+        if error:
+            return
+        
+        args = args.split(" ")
+
+        objects = storage.all()
+        key = ".".join(args)
+        obj = objects.get(key)
+        if obj:
+            print(obj)
+        else:
+            print("** no instance found **")
+
+
+        
+if __name__ == "__main__":
+    HBNBCommand().cmdloop()
