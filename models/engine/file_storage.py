@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+<<<<<<< HEAD
 """a class to serialize instances to JSON file\
      and deserializes JSON file to instances"""
 import json
@@ -6,10 +7,23 @@ import os
 
 
 class FileStorage:
+=======
+"""Module for class FileStorage"""
+
+import json
+from models.base_model import BaseModel
+from models.user import User
+
+
+class FileStorage:
+
+    """For the Serialization and Deserialization of Base Classes"""
+>>>>>>> AirBnB_clone_Fix
     __file_path = "file.json"
     __objects = {}
 
     def all(self):
+<<<<<<< HEAD
         """function to return the dictionary _objects"""
         return FileStorage.__objects
 
@@ -45,3 +59,64 @@ class FileStorage:
             with open(FileStorage.__file_path, 'r') as f:
                 for key, value in json.load(f).items():
                     self.new(dct[value['__class__']](**value))
+=======
+        return FileStorage.__objects
+
+    def new(self, obj):
+        key = f"{obj.__class__.__name__}.{obj.id}"
+        FileStorage.__objects[key] = obj
+
+    def save(self):
+        to_dict = {}
+        for key, obj in FileStorage.__objects.items():
+            to_dict[key] = obj.to_dict()
+
+        with open(FileStorage.__file_path, "w") as f:
+            json.dump(to_dict, f, indent=4)
+
+    def classes(self):
+        """Returns a dictionary of valid classes and their references."""
+        from models.base_model import BaseModel
+        from models.user import User
+        from models.state import State
+        from models.city import City
+        from models.amenity import Amenity
+        from models.place import Place
+        from models.review import Review
+
+        classes = {"BaseModel": BaseModel,
+                   "User": User,
+                   "State": State,
+                   "City": City,
+                   "Amenity": Amenity,
+                   "Place": Place,
+                   "Review": Review}
+        return classes
+
+    def reload(self):
+        try:
+            with open(FileStorage.__file_path, "r") as f:
+                _dict = json.load(f)
+
+            new_dict = {}
+            for obj_name, obj_details in _dict.items():
+                class_name = obj_name.split(".")[0]
+                obj = eval(class_name)(**obj_details)
+                new_dict[obj_name] = obj
+
+            FileStorage.__objects = new_dict
+        except FileNotFoundError:
+            pass
+
+    def delete(self, obj):
+        class_name = obj.__class__.__name__
+        id = obj.id
+        key = f"{class_name}.{id}"
+
+        if key in FileStorage.__objects:
+            del FileStorage.__objects[key]
+            self.save()
+            return True
+
+        return False
+>>>>>>> AirBnB_clone_Fix
