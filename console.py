@@ -1,53 +1,179 @@
 #!/usr/bin/python3
-"""Entry level of command line console"""
+"""Module for the entry point of the command interpreter"""
 
 import cmd
-import json
+from models.base_model import BaseModel
+from models.user import User
 from models import storage
+import json
 
-class AirBnBCommand(cmd.Cmd):
-    """Command line Processor"""
 
-    prompt = "(hbnb)"
-    l_classes = ['BaseModel']
+class HBNBCommand(cmd.Cmd):
 
-    l_c = ['create', 'show', 'update', 'all', 'destroy', 'count']
+    prompt = "(hbnb) "
 
-    def precmd(self, arg):
-        """accepts command input"""
-        if '.' in arg and '(' in arg and ')' in arg:
-            cls = arg.split('.')
-            cnd = cls[1].split('(')
-            args = cnd[1].split(')')
-            if cls[0] in AirBnBCommand.l_classes and cnd[0] in AirBnBCommand.l_c:
-                arg = cnd[0] + ' '+ cls[0] + ' '+ args[0]
+    model_list = ["BaseModel", "User"]
 
-        return arg
 
-    def help_help(self):
-        """Prints command line help"""
-        print("Provides description of a command")
+    def do_quit(self, args):
+        """This command quits the interpreter
+	"""
 
+        return True
+
+    def do_EOF(self, args):
+        """This command quits the interpreter
+        """
+        return True
+    
     def emptyline(self):
-        """do nothing when it is empty line"""
-        pass
+        """This command does nothing on ENTER
+        """
 
-    def do_count(self, cls_name):
-        """counts the number of instances in a class"""
-        count = 0
-        all_objs = storage.all()
-        for k, v in all_objs.items():
-            clss = k.split('.')
-            if clss[0] == cls_name:
-                count += 1
-        print(count)
+        return False
 
-    def do_create(self, type_model):
-        """creates an instance based on the class"""
-
-        if not type_model:
-            print("** class name is missing **")
-        elif type_model not in AirBnBCommand.l_classes:
-            print("** class does not exist **")
+    def onecmd(self, args):
+        if args == "quit":
+            return self.do_quit(args)
+        elif args == "EOF":
+            return self.do_EOF(args)
         else:
-            dct = 
+            cmd.Cmd.onecmd(self, args)
+
+    @classmethod
+    def handle_errors(cls,args, **kwargs):
+        if "all" in kwargs.values():
+            if not args:
+                return False
+        if not args:
+            print("** class name missing **")
+            return True
+        else:
+            args = args.split(" ")
+
+        n = len(args)
+
+        if args[0] not in HBNBCommand.model_list:
+            print("** class doesn't exist **")
+            return True
+        if 'com' not in kwargs:
+            return False
+        
+        for arg in kwargs.values():
+            if arg in ["show", "destroy"]:	
+                if n < 2:
+                    print("** instance id missing **")
+                    return True
+                if arg == "update":
+                    if n < 2:
+                        print("** instance id missing **")
+                        return True
+
+                elif n < 3:
+                    print("** attribute name missing **")
+                    return True
+
+                elif n < 4:
+                    print("** value missing **")
+                    return True
+                
+
+        return False
+
+    def do_create(self, args):
+
+        error = HBNBCommand.handle_errors(args)
+        
+        if error:
+            return
+
+        obj = eval(args)()
+        obj.save()
+        print(obj.id)
+
+    def do_show(self, args):
+        error = HBNBCommand.handle_errors(args, com = "show")
+
+        if error:
+            return
+        
+        args = args.split(" ")
+
+        objects = storage.all()
+        key = ".".join(args)
+        obj = objects.get(key)
+        if obj:
+            print(obj)
+        else:
+            print("** no instance found **")
+
+    def do_destroy(self, args:str):
+        error = HBNBCommand.handle_errors(args, com="destroy")
+
+        if error:
+            return
+
+        args = args.split()
+        key = f"{args[0]}.{args[1]}"
+
+        objects = storage.all()
+        
+        if key in objects and storage.delete(objects[key]):
+            pass
+        else:
+            print("** instance not found **")
+
+    def do_all(self, args):
+        error = HBNBCommand.handle_errors(args, com="all")
+
+        if error:
+            return
+
+        args = args.split(" ")
+
+        objects = storage.all()
+
+        if args[0] == "":
+            for obj in objects.values():
+                print(obj)
+
+        else:
+            for key in objects:
+                k = key.split(".")
+                if k[0] == args[0]:
+                    print(objects[key])
+
+    def do_update(self, args):
+        error = HBNBCommand.handle_errors(args, com="update")
+
+        if error:
+            return
+
+        args = args.split()
+        class_name = args[0]
+        id = args[1]
+        attr_name = args[2]
+        attr_value = args[3]
+
+        if "\"" in attr_value:
+            attr_value = attr_value[1:-1]
+
+        if attr_value.isdigit():
+            attr_value = int(attr_value)
+
+        objects = storage.all()
+        key = f"{class_name}.{id}"
+
+        for k in objects: # obj is pointing to the key
+            if k == key:
+                obj = objects[k]
+                setattr(obj, attr_name, attr_value)
+                # obj.__setattr(attr_name, attr_value)
+                obj.save()
+                return
+
+        print("** instance id not found **")
+
+
+if __name__ == "__main__":
+    HBNBCommand().cmdloop()
