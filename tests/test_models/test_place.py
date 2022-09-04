@@ -35,6 +35,7 @@ class TestPlace(unittest.TestCase):
         self.assertTrue(hasattr(self.p, 'id'))
         self.assertTrue(hasattr(self.p, 'created_at'))
         self.assertTrue(hasattr(self.p, 'updated_at'))
+<<<<<<< HEAD
 =======
 """Unittest module for the Place Class."""
 
@@ -88,3 +89,26 @@ class TestPlace(unittest.TestCase):
 if __name__ == "__main__":
     unittest.main()
 >>>>>>> AirBnB_clone_Fix
+=======
+
+    def test_types(self):
+        """testing the correctness of types of attribute"""
+        self.assertIsInstance(self.p.city_id, str)
+        self.assertIsInstance(self.p.user_id, str)
+        self.assertIsInstance(self.p.name, str)
+        self.assertIsInstance(self.p.description, str)
+        self.assertIsInstance(self.p.number_rooms, int)
+        self.assertIsInstance(self.p.number_bathrooms, int)
+        self.assertIsInstance(self.p.max_guest, int)
+        self.assertIsInstance(self.p.price_by_night, int)
+        self.assertIsInstance(self.p.latitude, float)
+        self.assertIsInstance(self.p.longitude, float)
+        self.assertIsInstance(self.p.amenity_ids, list)
+        self.assertIsInstance(self.p.id, str)
+        self.assertIsInstance(self.p.created_at, datetime.datetime)
+        self.assertIsInstance(self.p.updated_at, datetime.datetime)
+        
+
+if __name__== '__main__':
+    unittest.main()
+>>>>>>> fd9b1c2612cfa0109818d64a5bf769031c0b30c0
