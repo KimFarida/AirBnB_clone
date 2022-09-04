@@ -2,7 +2,8 @@
 """Module for class FileStorage"""
 
 import json
-import os
+from models.base_model import BaseModel
+from models.user import User
 
 
 class FileStorage:
@@ -26,6 +27,25 @@ class FileStorage:
         with open(FileStorage.__file_path, "w") as f:
             json.dump(to_dict, f, indent=4)
 
+    def classes(self):
+        """Returns a dictionary of valid classes and their references."""
+        from models.base_model import BaseModel
+        from models.user import User
+        from models.state import State
+        from models.city import City
+        from models.amenity import Amenity
+        from models.place import Place
+        from models.review import Review
+
+        classes = {"BaseModel": BaseModel,
+                   "User": User,
+                   "State": State,
+                   "City": City,
+                   "Amenity": Amenity,
+                   "Place": Place,
+                   "Review": Review}
+        return classes
+
     def reload(self):
         try:
             with open(FileStorage.__file_path, "r") as f:
@@ -33,9 +53,22 @@ class FileStorage:
 
             new_dict = {}
             for obj_name, obj_details in _dict.items():
-                obj = BaseModel(**obj_details)
+                class_name = obj_name.split(".")[0]
+                obj = eval(class_name)(**obj_details)
                 new_dict[obj_name] = obj
 
             FileStorage.__objects = new_dict
         except FileNotFoundError:
             pass
+
+    def delete(self, obj):
+        class_name = obj.__class__.__name__
+        id = obj.id
+        key = f"{class_name}.{id}"
+
+        if key in FileStorage.__objects:
+            del FileStorage.__objects[key]
+            self.save()
+            return True
+
+        return False

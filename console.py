@@ -3,6 +3,7 @@
 
 import cmd
 from models.base_model import BaseModel
+from models.user import User
 from models import storage
 import json
 
@@ -11,7 +12,7 @@ class HBNBCommand(cmd.Cmd):
 
     prompt = "(hbnb) "
 
-    model_list = ["BaseModel"]
+    model_list = ["BaseModel", "User"]
 
 
     def do_quit(self, args):
@@ -41,6 +42,9 @@ class HBNBCommand(cmd.Cmd):
 
     @classmethod
     def handle_errors(cls,args, **kwargs):
+        if "all" in kwargs.values():
+            if not args:
+                return False
         if not args:
             print("** class name missing **")
             return True
@@ -48,18 +52,31 @@ class HBNBCommand(cmd.Cmd):
             args = args.split(" ")
 
         n = len(args)
+
         if args[0] not in HBNBCommand.model_list:
             print("** class doesn't exist **")
             return True
-
-        if 'command' not in kwargs:
+        if 'com' not in kwargs:
             return False
-
         
         for arg in kwargs.values():
-            if n < 2:
-                print("** instance id missing **")
-                return True
+            if arg in ["show", "destroy"]:	
+                if n < 2:
+                    print("** instance id missing **")
+                    return True
+                if arg == "update":
+                    if n < 2:
+                        print("** instance id missing **")
+                        return True
+
+                elif n < 3:
+                    print("** attribute name missing **")
+                    return True
+
+                elif n < 4:
+                    print("** value missing **")
+                    return True
+                
 
         return False
 
@@ -75,7 +92,7 @@ class HBNBCommand(cmd.Cmd):
         print(obj.id)
 
     def do_show(self, args):
-        error = HBNBCommand.handle_errors(args, command = "show")
+        error = HBNBCommand.handle_errors(args, com = "show")
 
         if error:
             return
@@ -90,6 +107,73 @@ class HBNBCommand(cmd.Cmd):
         else:
             print("** no instance found **")
 
+    def do_destroy(self, args:str):
+        error = HBNBCommand.handle_errors(args, com="destroy")
+
+        if error:
+            return
+
+        args = args.split()
+        key = f"{args[0]}.{args[1]}"
+
+        objects = storage.all()
         
+        if key in objects and storage.delete(objects[key]):
+            pass
+        else:
+            print("** instance not found **")
+
+    def do_all(self, args):
+        error = HBNBCommand.handle_errors(args, com="all")
+
+        if error:
+            return
+
+        args = args.split(" ")
+
+        objects = storage.all()
+
+        if args[0] == "":
+            for obj in objects.values():
+                print(obj)
+
+        else:
+            for key in objects:
+                k = key.split(".")
+                if k[0] == args[0]:
+                    print(objects[key])
+
+    def do_update(self, args):
+        error = HBNBCommand.handle_errors(args, com="update")
+
+        if error:
+            return
+
+        args = args.split()
+        class_name = args[0]
+        id = args[1]
+        attr_name = args[2]
+        attr_value = args[3]
+
+        if "\"" in attr_value:
+            attr_value = attr_value[1:-1]
+
+        if attr_value.isdigit():
+            attr_value = int(attr_value)
+
+        objects = storage.all()
+        key = f"{class_name}.{id}"
+
+        for k in objects: # obj is pointing to the key
+            if k == key:
+                obj = objects[k]
+                setattr(obj, attr_name, attr_value)
+                # obj.__setattr(attr_name, attr_value)
+                obj.save()
+                return
+
+        print("** instance id not found **")
+
+
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
