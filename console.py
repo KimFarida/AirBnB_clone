@@ -1,32 +1,34 @@
-'''console.py
-'''
+#!/usr/bin/python3
+"""Module for the entry point of the command interpreter"""
 
 import cmd
 from models.base_model import BaseModel
 from models import storage
+import json
 
 
 class HBNBCommand(cmd.Cmd):
+
     prompt = "(hbnb) "
 
     model_list = ["BaseModel"]
 
 
-
     def do_quit(self, args):
-        '''
-        This command quits the interpreter
-        '''
+        """This command quits the interpreter
+	"""
+
         return True
 
     def do_EOF(self, args):
-        '''
-        This command quits the interpreter
-        '''
-
+        """This command quits the interpreter
+        """
         return True
     
     def emptyline(self):
+        """This command does nothing on ENTER
+        """
+
         return False
 
     def onecmd(self, args):
@@ -87,7 +89,6 @@ class HBNBCommand(cmd.Cmd):
             print(obj)
         else:
             print("** no instance found **")
-
 
         
 if __name__ == "__main__":

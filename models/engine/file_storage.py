@@ -1,11 +1,13 @@
-'''file_storage.py
-'''
+#!/usr/bin/python3
+"""Module for class FileStorage"""
 
 import json
-from models.base_model import BaseModel
+import os
 
 
 class FileStorage:
+
+    """For the Serialization and Deserialization of Base Classes"""
     __file_path = "file.json"
     __objects = {}
 

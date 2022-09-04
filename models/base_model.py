@@ -1,10 +1,10 @@
-'''base_model.py
-'''
+#!/usr/bin/python3
+"""Model for Base class"""
 
-from datetime import datetime
 import uuid
-
 import models
+from datetime import datetime
+
 
 
 class BaseModel:
@@ -12,11 +12,11 @@ class BaseModel:
     """Class for base model of object hierarchy."""
 
     def __init__(self, **kwargs):
-    """Initialization of a Base instance.
+        """Initialization of a Base instance.
          Args:
              - *args: list of arguments
              - **kwargs: dict of key-values arguments
-    """
+        """
 
         if kwargs:
             for key in kwargs.keys():
@@ -33,19 +33,19 @@ class BaseModel:
             models.storage.new(self)
 
     def __str__(self):
-	 """Returns string representation
+        """Returns string representation
         of an instance."""
 
         return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
 
     def save(self):
-        """Updates attribute
-        with the current datetime."""
-	self.updated_at = datetime.now()
+        """Updates attribute with the current datetime."""
+
+        self.updated_at = datetime.now()
         models.storage.save()
 
     def to_dict(self):
-	"""Returns a dictionary representation of an instance."""
+        """Returns a dictionary representation of an instance."""
 
         to_dict = self.__dict__.copy()
         to_dict["__class__"] = self.__class__.__name__
