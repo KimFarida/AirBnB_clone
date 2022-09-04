@@ -49,4 +49,8 @@ class TestUser(unittest.TestCase):
             self.assertEqual(type(getattr(o, k, None)), v)
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     unittest.main()
+=======
+    unittest.main()
+>>>>>>> fd9b1c2612cfa0109818d64a5bf769031c0b30c0
