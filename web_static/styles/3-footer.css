@@ -1,0 +1,19 @@
+footer{
+    display: flex;
+    background-color:white; 
+    height:60px; 
+    width: 100%;
+    align-items: stretch;
+    flex-direction: row;
+    justify-content: center;
+    position: fixed;
+    bottom: 0;
+    line-height: 60px;
+    border-top:1px #CCCCCC; 
+}
+
+.footer{
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
